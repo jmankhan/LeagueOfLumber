@@ -12,6 +12,7 @@ import java.text.DecimalFormat;
 import java.util.TimerTask;
 
 import main.Game;
+import main.PathFinder;
 import weapons.Weapon;
 
 public class Player {
@@ -207,6 +208,13 @@ public class Player {
 		
 	}
 	
+	public int getX() {
+		return x;
+	}
+	public int getY() {
+		return y;
+	}
+	
 	public int getXo(){
 		return xo;
 	}
@@ -215,6 +223,9 @@ public class Player {
 		return yo;
 	}
 	
+	public int getSpeed() {
+		return speed;
+	}
 	public Abilities getAbilities() {
 		return abilities;
 	}

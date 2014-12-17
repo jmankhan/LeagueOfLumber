@@ -1,6 +1,7 @@
 package main;
 
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -12,14 +13,24 @@ public class ClickManager implements MouseListener
 {
 	private int x, y;
 	private Timer timer;
+	private PathFinder pathFinder;
 	
 	public ClickManager() {
 		x=-100;
 		y=-100;
 	}
 
+	public void tick() {
+		if(pathFinder!=null) {
+			pathFinder.tick();
+		}
+	}
 	public void render(Graphics g) {
-		g.drawImage(Game.getImageManager().clickIcon, x, y, null);
+		if(pathFinder!=null)
+			pathFinder.render(g);
+		int scale = Game.TILESIZE*Game.SCALE;
+		g.drawImage(Game.getImageManager().clickIcon, x+(Game.getPlayer().getXo())/scale,
+				y+(Game.getPlayer().getYo())/scale, null);
 	}
 	
 	public int getX() {
@@ -33,11 +44,12 @@ public class ClickManager implements MouseListener
 	@Override
 	public void mouseClicked(MouseEvent e) 
 	{
-		x=e.getXOnScreen()-Game.TILESIZE*Game.SCALE;
-		y=e.getYOnScreen()-Game.TILESIZE*Game.SCALE;
+		x =e.getX();
+		y =e.getY();
+		
 		if(timer==null)
 		{
-			timer = new Timer(500,new ActionListener(){
+			timer = new Timer(1500,new ActionListener(){
 				public void actionPerformed(ActionEvent arg0) {
 					x=-100;
 					y=-100;
@@ -46,6 +58,15 @@ public class ClickManager implements MouseListener
 			});
 			timer.start();
 		}
+		
+		int scale = Game.TILESIZE*Game.SCALE;
+		int playerX = Game.getPlayer().getXo()+Game.getPlayer().getX();
+		int playerY = Game.getPlayer().getYo()+Game.getPlayer().getY();
+
+		Point playerPos = new Point(playerX/scale, playerY/scale);
+		Point mousePos  = new Point((x+Game.getPlayer().getXo())/scale, (y+Game.getPlayer().getYo())/scale);
+		
+		pathFinder = new PathFinder(playerPos, mousePos);
 	}
 
 	@Override

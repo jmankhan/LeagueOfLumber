@@ -98,7 +98,9 @@ public class Game extends Canvas implements Runnable{
 	public void tick(){
 		player.tick();
 		level.tick();
+		clickManager.tick();
 	}
+	
 	public void render(){
 		BufferStrategy bs = this.getBufferStrategy();
 		if(bs ==  null){
