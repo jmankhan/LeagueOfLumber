@@ -16,6 +16,7 @@ import players.Player;
  * steps: box around start node > find node closest to end node
  * move start node to "closest" node
  * repeat
+ * This is a greedy algorithm
  * need to add: obstacle detection
  * @author jmankhan
  *
@@ -97,11 +98,11 @@ public class PathFinder {
 		toCheck = new ArrayList<Point>();
 		toCheck.add(new Point(current.x		, current.y-1));
 		toCheck.add(new Point(current.x+1	, current.y-1));
-		toCheck.add(new Point(current.x+1	, current.y));
+		toCheck.add(new Point(current.x+1	, current.y))  ;
 		toCheck.add(new Point(current.x+1	, current.y+1));
 		toCheck.add(new Point(current.x		, current.y+1));
 		toCheck.add(new Point(current.x-1	, current.y+1));
-		toCheck.add(new Point(current.x-1	, current.y));
+		toCheck.add(new Point(current.x-1	, current.y))  ;
 		toCheck.add(new Point(current.x-1	, current.y-1));
 		
 		if(current.equals(goal)) {

@@ -26,7 +26,7 @@ public class Level {
 		trees = new ArrayList<Tree>();
 		loadLevel(levelImage);
 		
-		abilityHolder = Game.getAbilityHolder();
+		abilityHolder = Game.getHUD().getAbilityHolder();
 	}
 	
 	public void loadLevel(BufferedImage levelImage){
@@ -89,14 +89,6 @@ public class Level {
 		//trees
 		for(Tree t:trees) {
 			t.render(g);
-		}
-		
-		//hud
-		for(int i=0;i<4;i++) {
-			g.drawImage(Game.getPlayer().getAbilities().getIcon(i),(int) abilityHolder[i].getX(), 
-					(int)abilityHolder[i].getY(), (int)abilityHolder[i].getWidth(), 
-					(int)abilityHolder[i].getHeight(), null);
-			g.draw(abilityHolder[i]);
 		}
 		
 	}

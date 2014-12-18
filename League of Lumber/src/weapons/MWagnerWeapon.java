@@ -65,7 +65,6 @@ public class MWagnerWeapon extends Weapon{
 		if(isAtt) {
 			int scale = Game.TILESIZE*Game.SCALE;
 			g.drawImage(image,x-ax,y-ay, scale, scale, null);
-			g.draw(hitbox);
 		} else {
 			ax=0;
 			ay=0;

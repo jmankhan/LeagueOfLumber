@@ -12,7 +12,7 @@ public class ImageManager {
 	public BufferedImage grassTile, rockTile, treeTile, treeTrunk, treeFence, deadTree;
 	public BufferedImage[] playerUp, playerDown, playerLeft, playerRight, playerAbilities;
 	
-	public BufferedImage clickIcon, playerWeapon;
+	public BufferedImage clickIcon, playerWeapon, playerIcon;
 	
 	public ImageManager(SpriteSheet ss){
 		playerUp = new BufferedImage[3];
@@ -32,7 +32,7 @@ public class ImageManager {
 			playerAbilities[1] = ss.crop(9, PLAYER_ROW, Game.TILESIZE, Game.TILESIZE);
 			playerAbilities[2] = ss.crop(10, PLAYER_ROW, Game.TILESIZE, Game.TILESIZE);
 			playerAbilities[3] = ss.crop(11, PLAYER_ROW, Game.TILESIZE, Game.TILESIZE);
-			
+		playerIcon = ss.crop(12, PLAYER_ROW, Game.TILESIZE, Game.TILESIZE);
 		playerWeapon = ss.crop(8, PLAYER_ROW, Game.TILESIZE, Game.TILESIZE);
 		
 		grassTile	= ss.crop(0, RES_ROW, Game.TILESIZE, Game.TILESIZE);

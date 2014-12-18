@@ -36,8 +36,7 @@ public class Game extends Canvas implements Runnable{
 	private static Player player;
 	private static Level level;
 	private static ClickManager clickManager;
-
-	private static Rectangle[] abilityHolder;
+	private static HUD hud;
 	
 	public void init(){
 
@@ -47,7 +46,7 @@ public class Game extends Canvas implements Runnable{
 		SpriteSheet ss = new SpriteSheet(spriteSheet);
 		im = new ImageManager(ss);
 
-		createAbilityHolder();
+		hud = new HUD();
 		player = new MWagner(WIDTH * SCALE / 2, HEIGHT * SCALE / 2 - 2*TILESIZE, im);
 		clickManager = new ClickManager();
 		level = new Level(loader.load("/level.png"));
@@ -147,15 +146,6 @@ public class Game extends Canvas implements Runnable{
 		game.requestFocusInWindow();
 	}
 	
-	public void createAbilityHolder() {
-		int scale = Game.TILESIZE * Game.SCALE;
-		abilityHolder = new Rectangle[4];
-		abilityHolder[0] = new Rectangle(Game.WIDTH/2 - 3*scale, Game.HEIGHT-2*scale, 2*scale, 2*scale);
-		abilityHolder[1] = new Rectangle(Game.WIDTH/2 - scale, Game.HEIGHT-2*scale, 2*scale, 2*scale);
-		abilityHolder[2] = new Rectangle(Game.WIDTH/2 + scale, Game.HEIGHT-2*scale, 2*scale, 2*scale);
-		abilityHolder[3] = new Rectangle(Game.WIDTH/2 + 3*scale, Game.HEIGHT-2*scale, 2*scale, 2*scale);
-	}
-
 	public static Level getLevel(){
 		return level;
 	}
@@ -179,7 +169,8 @@ public class Game extends Canvas implements Runnable{
 	public static ClickManager getClickManager() {
 		return clickManager;
 	}
-	public static Rectangle[] getAbilityHolder() {
-		return abilityHolder;
+	
+	public static HUD getHUD() { 
+		return hud;
 	}
 }
