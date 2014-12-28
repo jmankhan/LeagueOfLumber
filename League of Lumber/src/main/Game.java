@@ -1,5 +1,6 @@
 package main;
 
+import graphics.HUD;
 import graphics.ImageLoader;
 import graphics.ImageManager;
 import graphics.SpriteSheet;
@@ -12,16 +13,19 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
 import javax.swing.JFrame;
 
+import levels.Level;
+import net.Chat;
+import net.Client;
 import players.MWagner;
 import players.Player;
-import levels.Level;
 
 public class Game extends Canvas implements Runnable{
 	private static final long serialVersionUID = 1L;
@@ -37,6 +41,10 @@ public class Game extends Canvas implements Runnable{
 	private static Level level;
 	private static ClickManager clickManager;
 	private static HUD hud;
+//	private static MiniMap miniMap;
+	private static Chat chat;
+	
+	private static Client client;
 	
 	public void init(){
 
@@ -50,6 +58,10 @@ public class Game extends Canvas implements Runnable{
 		player = new MWagner(WIDTH * SCALE / 2, HEIGHT * SCALE / 2 - 2*TILESIZE, im);
 		clickManager = new ClickManager();
 		level = new Level(loader.load("/level.png"));
+//		miniMap = new MiniMap(Game.WIDTH*Game.SCALE-2*Game.TILESIZE*Game.SCALE, Game.HEIGHT*Game.SCALE-2*Game.TILESIZE*Game.SCALE);
+		chat = new Chat(1600, 500);
+		
+		client.sendData("client connected".getBytes());
 		
 		addKeyListener(new KeyManager());
 		addMouseListener(clickManager);
@@ -57,11 +69,21 @@ public class Game extends Canvas implements Runnable{
 	}
 
 	public synchronized void start(){
-		if(running)return;
+		if(running)
+			return;
 		running = true;
+			
+		try {
+			client = new Client(this, "localhost");
+			client.start();
+			
+		} catch (SocketException e) {e.printStackTrace();
+		} catch (UnknownHostException e) {e.printStackTrace();}
+		
 		gameThread = new Thread(this);
 		gameThread.start();
 	}
+	
 	public synchronized void stop(){
 		if(!running)return;
 		running = false;
@@ -113,6 +135,7 @@ public class Game extends Canvas implements Runnable{
 		level.render(g);
 		player.render(g);
 		clickManager.render(g);
+		chat.render(g);
 		//END RENDER
 		g.dispose();
 		bs.show();
@@ -125,25 +148,25 @@ public class Game extends Canvas implements Runnable{
 		game.setMinimumSize(new Dimension(WIDTH*SCALE, HEIGHT*SCALE));
 
 		JFrame frame = new JFrame("Tile RPG");
+		frame.add(game);
 		frame.setSize(WIDTH * SCALE, HEIGHT * SCALE);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
-		frame.add(game);
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 		frame.setVisible(true);
 		frame.setIgnoreRepaint(true);
 		
-		Toolkit toolkit = Toolkit.getDefaultToolkit();
-		Image image = toolkit.getImage("res/cursor.png");
-		Cursor c = toolkit.createCustomCursor(image , new Point(0, 0), "img");
-		game.setCursor (c);
-
 		GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
 		device.setFullScreenWindow(frame);
 		game.setGameWidth(device.getDefaultConfiguration().getBounds().width);
 		game.setGameHeight(device.getDefaultConfiguration().getBounds().height);
 		game.start();
 		game.requestFocusInWindow();
+
+		Toolkit toolkit = Toolkit.getDefaultToolkit();
+		Image image = Toolkit.getDefaultToolkit().getImage("res/cursor.png");
+		Cursor c = toolkit.createCustomCursor(image , new Point(0, 0), "custom_cursor");
+		frame.setCursor(c);
 	}
 	
 	public static Level getLevel(){
@@ -172,5 +195,13 @@ public class Game extends Canvas implements Runnable{
 	
 	public static HUD getHUD() { 
 		return hud;
+	}
+	
+	public static Chat getChat() {
+		return chat;
+	}
+	
+	public static Client getClient() {
+		return client;
 	}
 }
