@@ -2,20 +2,20 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 public class Server extends Thread {
-	private final int PORT = 4444, MAX_PLAYERS = 2;
+	private final int PORT = 4444;
 	private DatagramSocket socket;
-	private SocketAddress[] connectedPlayerPorts;
-	
+
+	private ArrayList<PlayerConnection> connections;
 	String message="";
+	
 	public Server () throws SocketException, UnknownHostException {
 		socket = new DatagramSocket(PORT);
-		connectedPlayerPorts = new SocketAddress[MAX_PLAYERS];
+		connections = new ArrayList<PlayerConnection>();
 	}
 
 	public void run() {
@@ -24,21 +24,12 @@ public class Server extends Thread {
 			DatagramPacket packet = new DatagramPacket(data, data.length);
 			try {
 				socket.receive(packet);
-				for(int i=0;i<MAX_PLAYERS;i++) {
-					if(connectedPlayerPorts[i] == null) {
-						connectedPlayerPorts[i] = packet.getSocketAddress();
-						break;
-					}
-					if(packet.getSocketAddress().equals(connectedPlayerPorts[i]))
-						break;
-				}
+				connections.add(new PlayerConnection(packet.getPort(), packet.getAddress()));
 			} catch (IOException e) {e.printStackTrace();}
 			message = new String(packet.getData());
-//			try {
-//				sendData(message.getBytes(), packet.getAddress(), packet.getPort());
-			if(connectedPlayerPorts[MAX_PLAYERS-1]!=null)
-				sendDataToAll(message.getBytes(), packet.getPort());
-//			} catch (IOException e) {e.printStackTrace();}
+			try {
+				sendDataToAll(message.getBytes());
+			} catch (IOException e) {e.printStackTrace();}
 		}
 	}
 
@@ -47,12 +38,10 @@ public class Server extends Thread {
 		socket.send(packet);
 	}
 
-	public void sendDataToAll(byte[] data, int port) {
-		for(SocketAddress s:connectedPlayerPorts) {
-			DatagramPacket packet = new DatagramPacket(data, data.length, ((InetSocketAddress)s).getAddress(), port);
-			try {
-				socket.send(packet);
-			} catch (IOException e) {e.printStackTrace();}
+	public void sendDataToAll(byte[] data) throws IOException {
+		for(PlayerConnection p: connections) {
+			DatagramPacket packet = new DatagramPacket(data, data.length, p.getIpAddress(), p.getPort());
+			socket.send(packet);
 		}
 	}
 	
