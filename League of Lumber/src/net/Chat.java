@@ -55,7 +55,7 @@ public class Chat {
 		//draw messages recieved by server, adding line height as it goes
 		for(String line:Game.getClient().getRecievedMessages().split("\n")) {
 			int lineX = recievedMessages.x + 5;
-			int lineY = recievedMessages.y + g.getFontMetrics().getHeight()*++lineCount;
+			int lineY = recievedMessages.y + g.getFontMetrics().getHeight()*++lineCount; //it looks more impressive than it is
 			g.drawString(line, lineX, lineY);
 		}
 	}

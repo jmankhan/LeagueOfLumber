@@ -41,7 +41,6 @@ public class Game extends Canvas implements Runnable{
 	private static Level level;
 	private static ClickManager clickManager;
 	private static HUD hud;
-//	private static MiniMap miniMap;
 	private static Chat chat;
 	
 	private static Client client;
@@ -58,10 +57,7 @@ public class Game extends Canvas implements Runnable{
 		player = new MWagner(WIDTH * SCALE / 2, HEIGHT * SCALE / 2 - 2*TILESIZE, im);
 		clickManager = new ClickManager();
 		level = new Level(loader.load("/level.png"));
-//		miniMap = new MiniMap(Game.WIDTH*Game.SCALE-2*Game.TILESIZE*Game.SCALE, Game.HEIGHT*Game.SCALE-2*Game.TILESIZE*Game.SCALE);
 		chat = new Chat(1600, 500);
-		
-		client.sendData("client connected".getBytes());
 		
 		addKeyListener(new KeyManager());
 		addMouseListener(clickManager);

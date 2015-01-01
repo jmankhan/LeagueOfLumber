@@ -5,7 +5,7 @@ public class PlayerConnection {
 	private int port;
 	private InetAddress ipAddress;
 	
-	public PlayerConnection(int p, InetAddress ip) {
+	public PlayerConnection(InetAddress ip, int p) {
 		port = p;
 		ipAddress = ip;
 		System.out.println("new connection at: "+ipAddress.getCanonicalHostName() + ":" + port);

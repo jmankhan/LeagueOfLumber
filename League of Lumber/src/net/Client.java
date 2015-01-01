@@ -8,12 +8,14 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import main.Game;
+import packets.Packet;
 
 public class Client extends Thread {
 	private final int PORT = 4444;
 	private InetAddress ipAddress;
 	private DatagramSocket socket;
 	
+	private Packet recievedPacket;
 	private String message;
 	private StringBuilder recievedMessages;
 	private int numMessages = 0;
@@ -23,26 +25,45 @@ public class Client extends Thread {
 		ipAddress = InetAddress.getByName(_ipAddress);
 		
 		recievedMessages = new StringBuilder();
+		recievedPacket = new Packet();
+		
+		byte[] connect = {Packet.CONNECT};
+		sendData(connect);
 	}
 
 	public void run() {
 		while(true) {
+			//recieve data
 			byte[] data = new byte[1024];
 			DatagramPacket packet = new DatagramPacket(data, data.length);
+			
+			//figure out what to do with data
 			try {
 				socket.receive(packet);
-				recievedMessages.append(new String(packet.getData()).trim() + "\n");
-				numMessages++;
+				parsePacket(packet);
 			} catch (IOException e) {e.printStackTrace();}
+			
+			//set send packet content
 			message = new String(packet.getData()).trim();
 		}
 	}
-	
+
 	public void sendData(byte[] data) {
 		DatagramPacket packet = new DatagramPacket(data, data.length, ipAddress, PORT);
 		try {
 			socket.send(packet);
 		} catch (IOException e) {e.printStackTrace();}
+	}
+
+	private void parsePacket(DatagramPacket packet) {
+		byte[] data = packet.getData();
+		recievedPacket.setID(data[0]);
+		
+		if(recievedPacket.getID() == Packet.MESSAGE) {
+			recievedMessages.append(new String(data).trim() + "\n");
+			numMessages++;
+		}
+		
 	}
 	
 	public String getMessage() {
