@@ -13,13 +13,13 @@ public class Server extends Thread {
 	private DatagramSocket socket;
 	private String message;
 	
-	private Packet recievedPacket;
+	private Packet receivedPacket;
 	private ArrayList<PlayerConnection> connections;
 
 	public Server () throws SocketException, UnknownHostException {
 		socket = new DatagramSocket(PORT);
 		connections = new ArrayList<PlayerConnection>();
-		recievedPacket = new Packet();
+		receivedPacket = new Packet();
 	}
 
 	public void run() {
@@ -28,7 +28,7 @@ public class Server extends Thread {
 			//recieve data from client
 			byte[] data = new byte[1024];
 			DatagramPacket packet = new DatagramPacket(data, data.length);
-			
+
 			//figure out what to do with it, return a packet if necessary
 			try {
 			
@@ -59,16 +59,16 @@ public class Server extends Thread {
 		
 		//recieve packet
 		byte[] data = packet.getData();
-		recievedPacket.setID(data[0]);
+		receivedPacket.setID(data[0]);
 		
 		//add to connections list if new connection is being established
-		if(recievedPacket.getID() == Packet.CONNECT) {
+		if(receivedPacket.getID() == Packet.CONNECT) {
 			connections.add(new PlayerConnection(packet.getAddress(), packet.getPort()));
 		}
 		
 		//record message if chat is being sent
 		//send message to all clients as chat
-		else if(recievedPacket.getID() == Packet.MESSAGE) {
+		else if(receivedPacket.getID() == Packet.MESSAGE) {
 			message = new String(packet.getData()).trim();
 			sendDataToAll(data);
 		}

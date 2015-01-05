@@ -7,8 +7,10 @@ public class KeyManager implements KeyListener{
 
 	public void keyPressed(KeyEvent e) {
 		
-		if(e.getKeyCode() == KeyEvent.VK_ENTER) 
+		if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+			Game.getChat().setVisibility(!Game.getChat().isVisible());
 			Game.getChat().setFocused(!Game.getChat().isFocused());
+		}
 		
 		if(!Game.getChat().isFocused()) {
 			if(e.getKeyCode() == KeyEvent.VK_UP){

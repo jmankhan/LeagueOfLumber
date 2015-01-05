@@ -10,6 +10,8 @@ public class MWagner extends Player
 {
 	public MWagner(int x, int y, ImageManager im) {
 		super(x, y, im);
+		
+		name = "MWagner";
 		weapon = new MWagnerWeapon();
 		abilities = new Abilities();
 		

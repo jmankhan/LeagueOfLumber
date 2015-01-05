@@ -30,6 +30,7 @@ import players.Player;
 public class Game extends Canvas implements Runnable{
 	private static final long serialVersionUID = 1L;
 	public static int WIDTH = 400, HEIGHT = 400, SCALE = 2, TILESIZE = 32;
+	public static String SERVER_IP = "localhost"; //70.15.134.76 - my ip address
 	public static double FPS = 60D;
 	public static boolean running = false;
 	public Thread gameThread;
@@ -61,7 +62,6 @@ public class Game extends Canvas implements Runnable{
 		
 		addKeyListener(new KeyManager());
 		addMouseListener(clickManager);
-		
 	}
 
 	public synchronized void start(){
@@ -70,7 +70,7 @@ public class Game extends Canvas implements Runnable{
 		running = true;
 			
 		try {
-			client = new Client(this, "localhost");
+			client = new Client(this, SERVER_IP);
 			client.start();
 			
 		} catch (SocketException e) {e.printStackTrace();

@@ -18,6 +18,7 @@ import weapons.Weapon;
 public class Player {
 
 	protected int x, y, xo, yo, xs, ys, speed, angle[];
+	protected String name;
 	protected ImageManager im;
 	public boolean up = false, dn = false, lt = false, rt = false;
 	protected final int SIZE = Game.TILESIZE;
@@ -48,6 +49,8 @@ public class Player {
 		speed = 10;
 		this.im = im;
 
+		name = "Unknown";
+		
 		interval = 0;
 		timer=0;
 		now=0;
@@ -247,6 +250,11 @@ public class Player {
 	public int getSpeed() {
 		return speed;
 	}
+	
+	public String getName() {
+		return name;
+	}
+	
 	public Abilities getAbilities() {
 		return abilities;
 	}
@@ -258,4 +266,5 @@ public class Player {
 	public boolean getAttackState(int index) {
 		return att[index];
 	}
+	
 }

@@ -1,6 +1,11 @@
 package net;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -44,7 +49,7 @@ public class Client extends Thread {
 			} catch (IOException e) {e.printStackTrace();}
 			
 			//set send packet content
-			message = new String(packet.getData()).trim();
+			message = new String("<"+packet.getAddress()+"> ") + new String(packet.getData()).trim();
 		}
 	}
 
@@ -52,6 +57,7 @@ public class Client extends Thread {
 		DatagramPacket packet = new DatagramPacket(data, data.length, ipAddress, PORT);
 		try {
 			socket.send(packet);
+			log("sent packet to "+packet.getAddress()+":"+packet.getPort() + "     message: " + new String(packet.getData()).trim());
 		} catch (IOException e) {e.printStackTrace();}
 	}
 
@@ -60,7 +66,7 @@ public class Client extends Thread {
 		recievedPacket.setID(data[0]);
 		
 		if(recievedPacket.getID() == Packet.MESSAGE) {
-			recievedMessages.append(new String(data).trim() + "\n");
+			recievedMessages.append(new String(data).trim() + " \\n");
 			numMessages++;
 		}
 		
@@ -74,7 +80,19 @@ public class Client extends Thread {
 		return numMessages;
 	}
 	
-	public String getRecievedMessages() {
+	public String getReceivedMessages() {
 		return recievedMessages.toString();
 	}
+	
+	private void log(String text) {
+		try {
+			PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("LumberLog.txt", true))); 
+			out.append(text);
+			out.println();
+			out.close();
+		} catch (FileNotFoundException e) {e.printStackTrace();}
+		catch(IOException e) {e.printStackTrace();}
+		
+	}
+	
 }
