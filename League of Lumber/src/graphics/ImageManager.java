@@ -13,7 +13,7 @@ public class ImageManager {
 	public BufferedImage[] playerUp, playerDown, playerLeft, playerRight, playerAbilities;
 	
 	public BufferedImage clickIcon, playerWeapon, playerIcon;
-	
+
 	public ImageManager(SpriteSheet ss){
 		playerUp = new BufferedImage[3];
 			playerUp[0] = ss.crop(3, PLAYER_ROW, Game.TILESIZE, Game.TILESIZE);

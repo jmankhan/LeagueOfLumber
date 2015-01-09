@@ -1,4 +1,7 @@
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -6,7 +9,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import packets.*;
+import packets.Packet;
 
 public class Server extends Thread {
 	private final int PORT = 4444;
@@ -63,7 +66,14 @@ public class Server extends Thread {
 		
 		//add to connections list if new connection is being established
 		if(receivedPacket.getID() == Packet.CONNECT) {
-			connections.add(new PlayerConnection(packet.getAddress(), packet.getPort()));
+			String content = new String(data).trim();
+			if(content.length() > 1) {
+				String user = content.substring(0, content.indexOf(" "));
+				String pass = content.substring(user.length(), content.length());
+				if(user.equals("user") && pass.equals("pass")) {
+					System.out.println("Correct creds");
+				}
+			}
 		}
 		
 		//record message if chat is being sent

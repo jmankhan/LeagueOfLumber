@@ -46,6 +46,10 @@ public class Game extends Canvas implements Runnable{
 	
 	private static Client client;
 	
+	public Game(Client _client) {
+		client = _client;
+	}
+	
 	public void init(){
 
 		ImageLoader loader = new ImageLoader();
@@ -69,13 +73,6 @@ public class Game extends Canvas implements Runnable{
 			return;
 		running = true;
 			
-		try {
-			client = new Client(this, SERVER_IP);
-			client.start();
-			
-		} catch (SocketException e) {e.printStackTrace();
-		} catch (UnknownHostException e) {e.printStackTrace();}
-		
 		gameThread = new Thread(this);
 		gameThread.start();
 	}
@@ -138,12 +135,12 @@ public class Game extends Canvas implements Runnable{
 	}
 
 	public static void main(String[] args){
-		Game game = new Game();
+		Game game = new Game(null);
 		game.setPreferredSize(new Dimension(WIDTH*SCALE, HEIGHT*SCALE));
 		game.setMaximumSize(new Dimension(WIDTH*SCALE, HEIGHT*SCALE));
 		game.setMinimumSize(new Dimension(WIDTH*SCALE, HEIGHT*SCALE));
 
-		JFrame frame = new JFrame("Tile RPG");
+		JFrame frame = new JFrame("League of Lumber");
 		frame.add(game);
 		frame.setSize(WIDTH * SCALE, HEIGHT * SCALE);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -159,10 +156,10 @@ public class Game extends Canvas implements Runnable{
 		game.start();
 		game.requestFocusInWindow();
 
-		Toolkit toolkit = Toolkit.getDefaultToolkit();
-		Image image = Toolkit.getDefaultToolkit().getImage("res/cursor.png");
-		Cursor c = toolkit.createCustomCursor(image , new Point(0, 0), "custom_cursor");
-		frame.setCursor(c);
+//		Toolkit toolkit = Toolkit.getDefaultToolkit();
+//		Image image = Toolkit.getDefaultToolkit().getImage("res/cursor.png");
+//		Cursor c = toolkit.createCustomCursor(image , new Point(0, 0), "custom_cursor");
+//		frame.setCursor(c);
 	}
 	
 	public static Level getLevel(){

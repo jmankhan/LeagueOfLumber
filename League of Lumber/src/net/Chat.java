@@ -12,6 +12,11 @@ import java.util.TimerTask;
 
 import main.Game;
 
+/**
+ * Handles user side of chat messages, including displaying text, taking input and sending it to client
+ * @author jmankhan
+ *
+ */
 public class Chat {
 	private int x, y, width, height;
 	private String message;
@@ -23,8 +28,8 @@ public class Chat {
 	private boolean sendMessageFocused;
 	private boolean visible;
 	private Timer visibilityTimer;
-	private final int visibilityDelay = 1000;
-	
+	private final int visibilityDelay = 2000;
+
 	public Chat(int _x, int _y) {
 		x=_x;
 		y=_y;
@@ -39,11 +44,11 @@ public class Chat {
 
 		visible=false;
 		sendMessageFocused=false;
-		
+
 		visibilityTimer = null;
 	}
 
-	public void tick() {}
+	public void tick() {} //for consistency
 	public void render(Graphics gr) {
 		if(visible) {
 			Graphics2D g = (Graphics2D) gr;
@@ -83,56 +88,64 @@ public class Chat {
 		return sendMessageFocused;
 	}
 
+	
+	//focus and display the chatbox when enter is pressed
+	//when user is done typing (enter is pressed again), unfocus, and undisplay after a delay
+	//if they begin typing after focus is lost but before delay kicks in, cancel the invisibility timer
 	public void setFocused(boolean focus) {
 		sendMessageFocused = focus;
 		if(!focus) {
 			Game.getClient().sendData(message.getBytes());
 			message = "Press Enter to chat";
+			startVisibilityTimer();
 		}
-		else
+		else {
+			visible=true;
 			message = "";
+			if(visibilityTimer != null)
+				visibilityTimer.cancel();
+		}
 	}
 
 	public boolean isVisible() {
 		return visible;
 	}
-	
+
+	//make textbox invisible after a delay when user is done typing
+	//cancel the timer if user wants to type again before it goes invisi
 	public void setVisibility(boolean b) {
 		if(!b)
 			startVisibilityTimer();
-		else 
+		else {
+			if(visibilityTimer!=null)
+				visibilityTimer.cancel();
+
 			visible=b;
-	}
-	
-	public void startVisibilityTimer() {
-		if(visibilityTimer == null) {
-			visibilityTimer = new Timer();
-			visibilityTimer.schedule(new TimerTask() {
-				public void run() {
-					visible=false;
-					visibilityTimer.cancel();
-				}
-			}, visibilityDelay);
 		}
 	}
-	
+
+	//make text invisible after a delay
+	public void startVisibilityTimer() {
+		visibilityTimer = new Timer();
+		visibilityTimer.schedule(new TimerTask() {
+			public void run() {
+				visible=false;
+				visibilityTimer.cancel();
+			}
+		}, visibilityDelay);
+	}
+
+	//this took forever to make
 	private class LumberTextBox {
-		private final Color backColor = new Color(0.125f, 0.125f, 0.125f, 0.5f);
+		private final Color backColor = new Color(0.125f, 0.125f, 0.125f, 0.5f); //translucent background color
 		private String input;
-		private StringBuilder oldText;
 
 		public LumberTextBox() {
 			input="";
-			oldText = new StringBuilder();
-
 		}
 
 		public void setText(String text) {
 			input=text;
-		}
-
-		public void appendText(String _text) {
-			input+=_text;
 		}
 
 		//draw each word until end of line is reached, after which start a new line
@@ -142,33 +155,35 @@ public class Chat {
 			g.setColor(backColor);
 			g.fillRect(x, y, width, height);
 
-			g.setColor(Color.white);
-			int sy = y;
+			g.setColor(Color.white);						 //text color
 			FontMetrics fm = g.getFontMetrics();
-			StringTokenizer st = new StringTokenizer(input);
-			StringBuffer oneLine = new StringBuffer();
+			int row = y+fm.getHeight();						 //row on which baseline of text will be drawn
+			StringTokenizer st = new StringTokenizer(input); //parses a string into separate words
+			StringBuffer oneLine = new StringBuffer(); 		 //words are added to one string until line width exceeds textbox width
 
+			//loop through each word, deciding which line to place it
 			while(st.hasMoreTokens()) {
 				String word = st.nextToken();
-				
+
 				if(word!=null) {
-					if(word.equals("\\n")) {
-						sy+=fm.getHeight();
-						break;
+					//if new message, place on next line
+					if(word.equals(Client.NEWLINE.trim())) {
+						g.drawString(oneLine.toString(), x, row);
+						row+=fm.getHeight();
+						oneLine = new StringBuffer();
 					}
-					
-					if(fm.stringWidth(oneLine.toString() + word) < width) {
+
+					//if end of textbox not reached, add to same line
+					else if(fm.stringWidth(oneLine.toString() + word) < width) {
 						oneLine.append(word + " ");
 					}
+					//else draw the line and start a new one, placing the overreaching word on new line first
 					else {
-						g.drawString(oneLine.toString(), x, sy+fm.getHeight());
+						g.drawString(oneLine.toString(), x, row);
 						oneLine = new StringBuffer(word + " ");
-						sy += fm.getHeight();
+						row += fm.getHeight();
 					}
 				}
-			}
-			if(oneLine.length() > 0) {
-				g.drawString(oneLine.toString(), x, sy+fm.getHeight());
 			}
 		}
 	}

@@ -1,10 +1,11 @@
 package net;
 
 import java.io.BufferedWriter;
-import java.io.File;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -16,6 +17,7 @@ import main.Game;
 import packets.Packet;
 
 public class Client extends Thread {
+	public final static String NEWLINE = " !@#$%^&*() "; //code for new line, hopefully no one actually types this as a message
 	private final int PORT = 4444;
 	private InetAddress ipAddress;
 	private DatagramSocket socket;
@@ -38,7 +40,7 @@ public class Client extends Thread {
 
 	public void run() {
 		while(true) {
-			//recieve data
+			//receive data
 			byte[] data = new byte[1024];
 			DatagramPacket packet = new DatagramPacket(data, data.length);
 			
@@ -48,8 +50,8 @@ public class Client extends Thread {
 				parsePacket(packet);
 			} catch (IOException e) {e.printStackTrace();}
 			
-			//set send packet content
-			message = new String("<"+packet.getAddress()+"> ") + new String(packet.getData()).trim();
+			//reset packet content
+			message = new String(packet.getData()).trim();
 		}
 	}
 
@@ -57,16 +59,30 @@ public class Client extends Thread {
 		DatagramPacket packet = new DatagramPacket(data, data.length, ipAddress, PORT);
 		try {
 			socket.send(packet);
-			log("sent packet to "+packet.getAddress()+":"+packet.getPort() + "     message: " + new String(packet.getData()).trim());
+			//log activity to text file if necessary
+//			log("sent packet to "+packet.getAddress()+":"+packet.getPort() + "     message: " + new String(packet.getData()).trim());
 		} catch (IOException e) {e.printStackTrace();}
 	}
 
+	public void sendPacket(Packet packet) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+		try {
+			ObjectOutputStream oos = new ObjectOutputStream(baos);
+			oos.writeObject(packet);
+			byte[] data = baos.toByteArray();
+			
+			DatagramPacket dataPacket = new DatagramPacket(data, data.length, ipAddress, PORT);
+			socket.send(dataPacket);
+		} catch (IOException e) {e.printStackTrace();}
+		
+	}
+	
 	private void parsePacket(DatagramPacket packet) {
 		byte[] data = packet.getData();
 		recievedPacket.setID(data[0]);
 		
 		if(recievedPacket.getID() == Packet.MESSAGE) {
-			recievedMessages.append(new String(data).trim() + " \\n");
+			recievedMessages.append(new String(data).trim() + NEWLINE);
 			numMessages++;
 		}
 		
