@@ -5,6 +5,8 @@ import graphics.ImageLoader;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -21,11 +23,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import main.Game;
 import net.Client;
 import packets.LoginPacket;
 import packets.Packet;
 
 public class LoginPanel extends JPanel {
+	private static final long serialVersionUID = -2983096408874065103L;
+
 	public static String SERVER_IP = "localhost"; //70.15.134.76 - my ip address
 
 	private final String SPLASH_PATH = "/pause_small.jpg";
@@ -39,12 +44,15 @@ public class LoginPanel extends JPanel {
 
 	private boolean saveCredentials;
 	private boolean correctCredentials;
-	
+
 	private Font font;
 
 	private Client client;
 	private LoginPacket loginPacket;
-	public LoginPanel() {
+	private JFrame parent;
+
+	public LoginPanel(JFrame _parent) {
+		parent = _parent;
 		init();
 		setupGUI();
 	}
@@ -62,39 +70,54 @@ public class LoginPanel extends JPanel {
 				loginPacket = new LoginPacket();
 				loginPacket.setUsername(user.getText().trim());
 				loginPacket.setPassword(pass.getText().trim());
-				
+
+				//create a byte array with a connect signal in the beginning and credentials afterwards, separated by an arbitrary mark  
 				byte[] content = new byte[1024];
 				content[0] = Packet.CONNECT;
 				System.arraycopy(loginPacket.getUsername(), 0, content, 1, loginPacket.getUsernameLength());
-				content[loginPacket.getUsernameLength()+1] = ' ';
+				content[loginPacket.getUsernameLength()+1] = ':';
 				System.arraycopy(loginPacket.getPassword(), 0, content, loginPacket.getUsernameLength()+2, loginPacket.getPasswordLength());
-				
+
 				client.sendData(content);
+				
+				while(!client.isConnected()) {
+					if(client.isConnected()) {
+						//make frame fullscreen
+				 		GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().setFullScreenWindow(parent);
+
+						//attach game to frame and start it
+						Game game = new Game(client);
+						parent.add(game);
+						game.start();
+						parent.remove(LoginPanel.this);
+					}
+				}
 			}
 		});
 		saveCredentialsBox = new JCheckBox();
 		saveCredentialsBox.setOpaque(false);
-		
+
 		saveCredentials = false;
 		correctCredentials = false;
-		
+
 		try {
 			client = new Client(null, SERVER_IP);
+			client.start();
 		} catch (SocketException | UnknownHostException e) {e.printStackTrace();}
 	}
 
 	public void setupGUI() {
 		setLayout(new GridBagLayout());
-		
+
 		GridBagConstraints gc = new GridBagConstraints();
 
 		GridBagLayout credentialsLayout = new GridBagLayout();
 		GridBagConstraints gbc = new GridBagConstraints();
-		
+
 		gc.anchor = GridBagConstraints.LINE_START;
 		gc.weightx = 1.0;
 		gc.insets = new Insets(0, WIDTH/25, HEIGHT/5, 0);
-		
+
 		JPanel credentialsPanel = new JPanel();
 		credentialsPanel.setLayout(credentialsLayout);
 		credentialsPanel.setBackground(backColor);
@@ -103,44 +126,44 @@ public class LoginPanel extends JPanel {
 		JLabel userLabel = new JLabel("Username: "); 
 		JLabel passLabel = new JLabel("Password: "); 
 		JLabel saveCredentialsLabel = new JLabel("        Save login?");
-		
+
 		JLabel[] labels = {header, userLabel, passLabel, saveCredentialsLabel};
-		
+
 		for(JLabel l: labels) {
 			l.setForeground(Color.white);
 			l.setFont(font);
 		}
 		saveCredentialsLabel.setFont(font.deriveFont(12f));
-		
+
 		int margin = WIDTH/25;
 		int gridy = 0;
-		
+
 		gbc.gridx = 0;
 		gbc.gridy = gridy++;
 		gbc.insets = new Insets(margin, margin, 0, margin);
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		credentialsPanel.add(header, gbc);
-		
+
 		gbc.gridy = gridy++;
 		gbc.insets = new Insets(25, margin, 0, margin);
 		credentialsPanel.add(userLabel, gbc);
-		
+
 		gbc.gridy = gridy++;
 		gbc.insets = new Insets(5, margin, 0, margin);
 		credentialsPanel.add(user, gbc);
-		
+
 		gbc.gridy = gridy++;
 		credentialsPanel.add(passLabel, gbc);
-		
+
 		gbc.gridy = gridy++;
 		credentialsPanel.add(pass, gbc);
-		
+
 		gbc.gridy = gridy++;
 		gbc.fill = GridBagConstraints.NONE;
 		gbc.anchor = GridBagConstraints.LINE_START;
 		credentialsPanel.add(saveCredentialsBox, gbc);
 		credentialsPanel.add(saveCredentialsLabel, gbc);
-		
+
 		gbc.gridy = gridy++;
 		gbc.anchor = GridBagConstraints.LINE_END;
 		gbc.insets = new Insets(5, margin, margin, margin);
@@ -157,13 +180,13 @@ public class LoginPanel extends JPanel {
 
 	public static void main(String args[]) {
 		JFrame f = new JFrame("League of Lumber");
-		
-		f.add(new LoginPanel());
+
+		f.add(new LoginPanel(f));
 		f.setVisible(true);
 		f.setSize(WIDTH, HEIGHT);
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f.setLocationRelativeTo(null);
 		f.setResizable(false);
-		
+		f.setIgnoreRepaint(true);
 	}
 }

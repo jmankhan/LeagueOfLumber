@@ -8,7 +8,6 @@ public class PlayerConnection {
 	public PlayerConnection(InetAddress ip, int p) {
 		port = p;
 		ipAddress = ip;
-		System.out.println("new connection at: "+ipAddress.getCanonicalHostName() + ":" + port);
 	}
 
 	public int getPort() {

@@ -1,7 +1,4 @@
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -37,7 +34,6 @@ public class Server extends Thread {
 			
 				socket.receive(packet);
 				parsePacket(packet);
-
 			} catch (IOException e) {e.printStackTrace();}
 		}
 	}
@@ -63,16 +59,29 @@ public class Server extends Thread {
 		//recieve packet
 		byte[] data = packet.getData();
 		receivedPacket.setID(data[0]);
-		
+
 		//add to connections list if new connection is being established
 		if(receivedPacket.getID() == Packet.CONNECT) {
+			connections.add(new PlayerConnection(packet.getAddress(), packet.getPort()));
 			String content = new String(data).trim();
-			if(content.length() > 1) {
-				String user = content.substring(0, content.indexOf(" "));
-				String pass = content.substring(user.length(), content.length());
-				if(user.equals("user") && pass.equals("pass")) {
-					System.out.println("Correct creds");
+			
+			if(!content.isEmpty()) {
+				String user = content.substring(0, content.indexOf(':'));
+				String pass = content.substring(user.length()+1, content.length());
+				
+				byte[] response = new byte[1024];
+				response[0] = Packet.CONNECT;
+				
+				if(user.equals("user") && pass.equals("pass")) { 
+					response[1] = Packet.CONNECT;
 				}
+				else {
+					response[1] = Packet.INVALID;
+				}
+
+				try {
+					sendData(response, packet.getAddress(), packet.getPort());
+				} catch (IOException e) {e.printStackTrace();}
 			}
 		}
 		
@@ -83,6 +92,7 @@ public class Server extends Thread {
 			sendDataToAll(data);
 		}
 		
+		receivedPacket = new Packet();
 	}
 	
 	public static void main(String args[]) {

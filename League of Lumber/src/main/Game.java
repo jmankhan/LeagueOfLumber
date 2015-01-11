@@ -6,14 +6,11 @@ import graphics.ImageManager;
 import graphics.SpriteSheet;
 
 import java.awt.Canvas;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.net.SocketException;
@@ -28,7 +25,7 @@ import players.MWagner;
 import players.Player;
 
 public class Game extends Canvas implements Runnable{
-	private static final long serialVersionUID = 1L;
+
 	public static int WIDTH = 400, HEIGHT = 400, SCALE = 2, TILESIZE = 32;
 	public static String SERVER_IP = "localhost"; //70.15.134.76 - my ip address
 	public static double FPS = 60D;
@@ -51,7 +48,11 @@ public class Game extends Canvas implements Runnable{
 	}
 	
 	public void init(){
-
+		WIDTH = 1920;
+		HEIGHT = 1080;
+		
+		requestFocusInWindow();
+		
 		ImageLoader loader = new ImageLoader();
 		spriteSheet = loader.load("/sprites.png");
 		
@@ -72,7 +73,14 @@ public class Game extends Canvas implements Runnable{
 		if(running)
 			return;
 		running = true;
-			
+		
+		try {
+			client = new Client(this, SERVER_IP);
+			client.start();
+		} catch (SocketException | UnknownHostException e) {
+			e.printStackTrace();
+		}
+		
 		gameThread = new Thread(this);
 		gameThread.start();
 	}
@@ -129,38 +137,39 @@ public class Game extends Canvas implements Runnable{
 		player.render(g);
 		clickManager.render(g);
 		chat.render(g);
+
 		//END RENDER
 		g.dispose();
 		bs.show();
 	}
 
-	public static void main(String[] args){
-		Game game = new Game(null);
-		game.setPreferredSize(new Dimension(WIDTH*SCALE, HEIGHT*SCALE));
-		game.setMaximumSize(new Dimension(WIDTH*SCALE, HEIGHT*SCALE));
-		game.setMinimumSize(new Dimension(WIDTH*SCALE, HEIGHT*SCALE));
-
-		JFrame frame = new JFrame("League of Lumber");
-		frame.add(game);
-		frame.setSize(WIDTH * SCALE, HEIGHT * SCALE);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setResizable(false);
-		frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
-		frame.setVisible(true);
-		frame.setIgnoreRepaint(true);
-		
-		GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
-		device.setFullScreenWindow(frame);
-		game.setGameWidth(device.getDefaultConfiguration().getBounds().width);
-		game.setGameHeight(device.getDefaultConfiguration().getBounds().height);
-		game.start();
-		game.requestFocusInWindow();
-
+//	public static void main(String[] args){
+//		Game game = new Game();
+//		game.setPreferredSize(new Dimension(WIDTH*SCALE, HEIGHT*SCALE));
+//		game.setMaximumSize(new Dimension(WIDTH*SCALE, HEIGHT*SCALE));
+//		game.setMinimumSize(new Dimension(WIDTH*SCALE, HEIGHT*SCALE));
+//
+//		JFrame frame = new JFrame("League of Lumber");
+//		frame.add(game);
+//		frame.setSize(WIDTH * SCALE, HEIGHT * SCALE);
+//		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//		frame.setResizable(false);
+//		frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+//		frame.setVisible(true);
+//		frame.setIgnoreRepaint(true);
+//		
+//		GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
+//		device.setFullScreenWindow(frame);
+//		game.setGameWidth(device.getDefaultConfiguration().getBounds().width);
+//		game.setGameHeight(device.getDefaultConfiguration().getBounds().height);
+//		game.start();
+//		game.requestFocusInWindow();
+//
 //		Toolkit toolkit = Toolkit.getDefaultToolkit();
 //		Image image = Toolkit.getDefaultToolkit().getImage("res/cursor.png");
 //		Cursor c = toolkit.createCustomCursor(image , new Point(0, 0), "custom_cursor");
 //		frame.setCursor(c);
-	}
+//	}
 	
 	public static Level getLevel(){
 		return level;

@@ -10,6 +10,7 @@ import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import packets.Packet;
 import main.Game;
 
 /**
@@ -50,6 +51,7 @@ public class Chat {
 
 	public void tick() {} //for consistency
 	public void render(Graphics gr) {
+		gr.drawString("pls", 100, 100);
 		if(visible) {
 			Graphics2D g = (Graphics2D) gr;
 
